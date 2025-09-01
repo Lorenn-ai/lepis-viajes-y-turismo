@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agencia – Carga de Paquetes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-slate-900">
+  <main class="max-w-3xl mx-auto px-4 py-6 grid gap-6">
+
+    <!-- FORMULARIO -->
+    <section class="space-y-5">
+      <h2 class="text-xl font-semibold">Completá la plantilla</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <label class="block">
+          <span class="block mb-1 font-medium">Destino</span>
+          <input id="destino" type="text" class="w-full rounded-xl border px-3 py-2" placeholder="Ej: Camboriú" />
+        </label>
+        <label class="block">
+          <span class="block mb-1 font-medium">Temporada / Fechas</span>
+          <input id="temporada" type="text" class="w-full rounded-xl border px-3 py-2" placeholder="Oct 2025 – Mar 2026" />
+        </label>
+        <label class="block">
+          <span class="block mb-1 font-medium">Salidas</span>
+          <input id="salidas" type="text" class="w-full rounded-xl border px-3 py-2" placeholder="Desde Rosario" />
+        </label>
+        <label class="block">
+          <span class="block mb-1 font-medium">Duración</span>
+          <input id="duracion" type="text" class="w-full rounded-xl border px-3 py-2" placeholder="7 noches" />
+        </label>
+      </div>
+
+      <label class="block">
+        <span class="block mb-1 font-medium">Descripción</span>
+        <textarea id="descripcion" class="w-full rounded-xl border px-3 py-2 min-h-[72px]" placeholder="Servicios, transporte, condiciones, etc."></textarea>
+      </label>
+
+      <div class="space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+          <label class="block">
+            <span class="block mb-1 font-medium">Moneda</span>
+            <select id="moneda" class="w-full rounded-xl border px-3 py-2">
+              <option value="USD">USD</option>
+              <option value="ARS">ARS</option>
+            </select>
+          </label>
+          <div class="md:col-span-2 flex gap-4">
+            <label class="inline-flex items-center gap-2"><input id="modo_unico" type="radio" name="precio_modo" value="unico" checked class="w-5 h-5" /><span>Precio único</span></label>
+            <label class="inline-flex items-center gap-2"><input id="modo_hoteles" type="radio" name="precio_modo" value="hoteles" class="w-5 h-5" /><span>Varios hoteles</span></label>
+          </div>
+        </div>
+
+        <div id="seccionPrecioUnico" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="block md:col-span-2">
+            <span class="block mb-1 font-medium">Precio por persona</span>
+            <input id="precio_unico" type="number" min="0" step="1" class="w-full rounded-xl border px-3 py-2" placeholder="Ej.: 650" />
+          </label>
+        </div>
+
+        <div id="seccionHoteles" class="space-y-3 hidden">
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold">Precios por hotel</h3>
+            <button id="btnAddHotel" class="px-3 py-2 rounded-xl bg-blue-600 text-white font-medium">+ Agregar hotel</button>
+          </div>
+          <div>
+            <table class="w-full text-left border" aria-label="Tabla de precios por hotel">
+              <thead class="bg-slate-100">
+                <tr>
+                  <th class="p-2">Hotel</th>
+                  <th class="p-2">Precio</th>
+                  <th class="p-2">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="hotelesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <label class="block">
+        <span class="block mb-1 font-medium">Imagen (URL)</span>
+        <input id="imagen" type="url" class="w-full rounded-xl border px-3 py-2" placeholder="Pegá el enlace de la imagen del destino" />
+      </label>
+
+      <div class="flex flex-wrap gap-3 pt-1">
+        <button id="btnGuardar" class="px-4 py-2 rounded-2xl bg-blue-600 text-white">Guardar</button>
+        <button id="btnLimpiar" class="px-4 py-2 rounded-2xl bg-slate-200">Limpiar</button>
+      </div>
+    </section>
+
+    <!-- PREVIEW / LISTA -->
+    <section class="space-y-5">
+      <div class="space-y-3">
+        <h2 class="text-xl font-semibold">Vista previa</h2>
+        <article id="preview" class="grid gap-4 md:grid-cols-2 border p-4">
+          <div>
+            <img id="previewImg" src="https://images.unsplash.com/photo-1567260602552-5285e8499871?q=80&w=1200&auto=format&fit=crop" alt="Imagen del destino" class="w-full h-56 object-cover" />
+          </div>
+          <div class="space-y-2">
+            <h3 id="previewTitulo" class="text-2xl font-bold">—</h3>
+            <p id="previewFechas" class="text-slate-700">—</p>
+            <p id="previewDesc" class="text-slate-700"></p>
+            <div>
+              <h4 id="previewPrecioTitulo" class="font-semibold">Precio</h4>
+              <ul id="previewPrecios" class="pl-5 list-disc space-y-1"></ul>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-xl font-semibold">Paquetes guardados</h2>
+          <button id="btnBorrarTodo" class="px-3 py-2 rounded-xl bg-rose-600 text-white">Borrar todo</button>
+        </div>
+        <div id="listaPaquetes" class="grid gap-2 text-sm"></div>
+      </div>
+    </section>
+  </main>
+
+  <template id="tplHotelFila">
+    <tr>
+      <td class="p-2"><input type="text" class="hotel w-full rounded-lg border px-2 py-1" placeholder="Nombre del hotel" /></td>
+      <td class="p-2"><input type="number" min="0" step="1" class="precio w-full rounded-lg border px-2 py-1" placeholder="Precio" /></td>
+      <td class="p-2"><button class="btnQuitar text-sm px-3 py-1 rounded-lg bg-slate-200">Quitar</button></td>
+    </tr>
+  </template>
+
+  <template id="tplTarjeta">
+    <div class="grid md:grid-cols-3 border p-3 gap-3">
+      <img class="w-full h-32 md:h-full object-cover" alt="Foto" />
+      <div class="md:col-span-2 space-y-1">
+        <h3 class="font-bold text-base"></h3>
+        <p class="text-slate-700"></p>
+        <p class="desc text-sm"></p>
+        <div>
+          <h4 class="font-semibold text-sm">Precio</h4>
+          <ul class="list-disc pl-5 text-sm"></ul>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+    const hotelesBody = $('#hotelesBody');
+    const tplHotelFila = $('#tplHotelFila');
+
+    function addHotelRow(nombre = '', precio = '') {
+      const row = tplHotelFila.content.firstElementChild.cloneNode(true);
+      row.querySelector('.hotel').value = nombre;
+      row.querySelector('.precio').value = precio;
+      row.querySelector('.btnQuitar').addEventListener('click', () => row.remove());
+      hotelesBody.appendChild(row);
+    }
+
+    $('#btnAddHotel').addEventListener('click', () => addHotelRow());
+
+    function getFormData() {
+      const hoteles = $$('#hotelesBody tr').map(tr => ({
+        hotel: tr.querySelector('.hotel').value.trim(),
+        precio: Number(tr.querySelector('.precio').value)
+      })).filter(h => h.hotel);
+
+      const precioModo = $('#modo_hoteles').checked ? 'hoteles' : 'unico';
+
+      return {
+        destino: $('#destino').value.trim(),
+        temporada: $('#temporada').value.trim(),
+        salidas: $('#salidas').value.trim(),
+        duracion: $('#duracion').value.trim(),
+        descripcion: $('#descripcion').value.trim(),
+        moneda: $('#moneda').value,
+        precioModo,
+        precioUnico: Number($('#precio_unico').value) || 0,
+        hoteles,
+        imagen: $('#imagen').value.trim() || 'https://images.unsplash.com/photo-1567260602552-5285e8499871?q=80&w=1200&auto=format&fit=crop'
+      };
+    }
+
+    function setFormData(d) {
+      $('#destino').value = d.destino || '';
+      $('#temporada').value = d.temporada || '';
+      $('#salidas').value = d.salidas || '';
+      $('#duracion').value = d.duracion || '';
+      $('#descripcion').value = d.descripcion || '';
+      $('#moneda').value = d.moneda || 'USD';
+      $('#precio_unico').value = d.precioUnico || '';
+      const modo = d.precioModo || ((d.hoteles && d.hoteles.length) ? 'hoteles' : 'unico');
+      $('#modo_unico').checked = modo === 'unico';
+      $('#modo_hoteles').checked = modo === 'hoteles';
+      updatePrecioModeUI();
+      hotelesBody.innerHTML = '';
+      (d.hoteles || []).forEach(h => addHotelRow(h.hotel, h.precio));
+      $('#imagen').value = d.imagen || '';
+      renderPreview();
+    }
+
+    function updatePrecioModeUI() {
+      const esHoteles = $('#modo_hoteles').checked;
+      $('#seccionHoteles').classList.toggle('hidden', !esHoteles);
+      $('#seccionPrecioUnico').classList.toggle('hidden', esHoteles);
+    }
+
+    function renderPreview() {
+      const d = getFormData();
+      $('#previewImg').src = d.imagen;
+      $('#previewTitulo').textContent = `${d.destino || 'Destino'} – ${d.duracion || ''}`.trim();
+      $('#previewFechas').textContent = `${d.temporada || ''} · Salidas: ${d.salidas || ''}`.trim();
+      $('#previewDesc').textContent = d.descripcion || '';
+
+      if (d.precioModo === 'unico') {
+        $('#previewPrecioTitulo').textContent = 'Precio';
+        const line = d.precioUnico ? [`Por persona: ${d.moneda} ${d.precioUnico}`] : [];
+        $('#previewPrecios').innerHTML = line.map(x => `<li>${x}</li>`).join('');
+      } else {
+        $('#previewPrecioTitulo').textContent = 'Precios por hotel';
+        $('#previewPrecios').innerHTML = d.hoteles.map(h => `<li>${h.hotel}: ${d.moneda} ${h.precio}</li>`).join('');
+      }
+      // sin promoción
+    }
+
+    ['input','change'].forEach(evt => {
+      document.body.addEventListener(evt, (e) => {
+        if (e.target.closest('#hotelesBody') || e.target.matches('input, select, textarea')) {
+          renderPreview();
+        }
+      });
+    });
+
+    // Toggle UI por modo de precio
+    document.body.addEventListener('change', (e) => {
+      if (e.target.matches('input[name="precio_modo"]')) {
+        updatePrecioModeUI();
+        renderPreview();
+      }
+    });
+
+    // Persistencia simple
+    function loadAll() {
+      try { return JSON.parse(localStorage.getItem('paquetes_viajes') || '[]'); } catch { return []; }
+    }
+    function saveAll(arr) { localStorage.setItem('paquetes_viajes', JSON.stringify(arr)); }
+
+    function pintarLista() {
+      const cont = $('#listaPaquetes');
+      cont.innerHTML = '';
+      const data = loadAll();
+      const tpl = $('#tplTarjeta');
+      data.forEach((p, idx) => {
+        const card = tpl.content.firstElementChild.cloneNode(true);
+        card.querySelector('img').src = p.imagen;
+        card.querySelector('h3').textContent = `${p.destino || ''} – ${p.duracion || ''}`.trim();
+        card.querySelector('p').textContent = `${p.temporada || ''} · Salidas: ${p.salidas || ''}`.trim();
+        const descEl = card.querySelector('p.desc');
+        if (descEl) descEl.textContent = p.descripcion || '';
+
+        const preciosEl = card.querySelector('ul');
+        const esHoteles = (p.precioModo || ((p.hoteles||[]).length ? 'hoteles' : 'unico')) === 'hoteles';
+        if (esHoteles) {
+          preciosEl.innerHTML = (p.hoteles||[]).map(h => `<li>${h.hotel}: ${p.moneda} ${h.precio}</li>`).join('');
+        } else {
+          const line = p.precioUnico ? [`Por persona: ${p.moneda} ${p.precioUnico}`] : [];
+          preciosEl.innerHTML = line.map(x => `<li>${x}</li>`).join('');
+        }
+        // sin promoción
+
+        const acciones = document.createElement('div');
+        acciones.className = 'flex gap-2 p-3 border-t bg-slate-50';
+        const btnEditar = Object.assign(document.createElement('button'), { className:'px-3 py-1 rounded-lg bg-blue-600 text-white', textContent:'Editar' });
+        const btnBorrar = Object.assign(document.createElement('button'), { className:'px-3 py-1 rounded-lg bg-rose-600 text-white', textContent:'Borrar' });
+        btnEditar.addEventListener('click', () => setFormData(p));
+        btnBorrar.addEventListener('click', () => { const all = loadAll(); all.splice(idx,1); saveAll(all); pintarLista(); });
+        acciones.append(btnEditar, btnBorrar);
+        card.appendChild(acciones);
+
+        cont.appendChild(card);
+      });
+    }
+
+    function guardarDatos() {
+      const d = getFormData();
+      if (!d.destino) { alert('Completá el destino.'); $('#destino').focus(); return; }
+      if (!d.duracion) { alert('Completá la duración.'); $('#duracion').focus(); return; }
+      if (d.precioModo === 'unico') {
+        if (!d.precioUnico) { alert('Ingresá el precio por persona.'); $('#precio_unico').focus(); return; }
+      } else {
+        if (!d.hoteles.length) { alert('Agregá al menos un hotel y precio.'); return; }
+      }
+      const all = loadAll();
+      all.unshift(d);
+      saveAll(all);
+      pintarLista();
+      alert('Paquete guardado.');
+    }
+
+    $('#btnGuardar').addEventListener('click', () => guardarDatos());
+
+    $('#btnBorrarTodo').addEventListener('click', () => {
+      if (confirm('¿Borrar todos los paquetes guardados?')) {
+        localStorage.removeItem('paquetes_viajes');
+        pintarLista();
+      }
+    });
+
+    $('#btnLimpiar').addEventListener('click', () => {
+      setFormData({ hoteles: [] });
+      addHotelRow();
+    });
+
+    // se quitó impresión
+
+    // Se quitó el ejemplo pre-cargado para simplificar la interfaz
+
+    // Init
+    addHotelRow();
+    updatePrecioModeUI();
+    pintarLista();
+    renderPreview();
+  </script>
+</body>
+</html>
